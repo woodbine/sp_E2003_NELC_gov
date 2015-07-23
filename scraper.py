@@ -64,54 +64,47 @@ blocks = soup.find('div', 'module introPromos twoPerRow thumbTitleOnly')
 links_block = blocks.find_all('a', href = True)
 for link_block in links_block:
     csvmth = link_block['title']
-    if 'spending' or 'Spending' in csvmth:
-        main_links = 'http://www.nelincs.gov.uk' + link_block['href']
-        print main_links
-        html_links = urllib2.urlopen(main_links)
-        sp = BeautifulSoup(html_links)
+    if '20' in link_block['href']:
+       main_links = 'http://www.nelincs.gov.uk' + link_block['href']
+       html_links = urllib2.urlopen(main_links)
+       sp = BeautifulSoup(html_links)
        # print link_block.text, main_links
-        block = sp.find('table', 'pageTable downloads')
-        links = block.find_all('a', href = True)
-        for link in links:
+       block = sp.find('table', 'pageTable downloads')
+       links = block.find_all('a', href = True)
+       for link in links:
             csvlink = link.text
             if 'Spending' and 'Data'and '(CSV)' in csvlink:
-                print link['href']
-               #  csvFile = link.text
-               #  print csvFile
-               #  url = link['href']
-               # # print url
-               #  if 'Spending' and 'CSV' in csvFile:
-               #      csvMth = csvFile.split(' ')
-                #print csvMth
-               # print csvMth
-                # if '-' in csvFile:
-                #     csvMth = csvFile.split('-').strip[1][0:3].strip()
-                #     print csvMth
-#                 csvYr = csvFile.split(' ')[4].strip()
-#                 if '(CSV)' in csvYr:
-#                    csvYr = '2011'
-#                 csvMth = convert_mth_strings(csvMth.upper())
-#                 filename = entity_id + "_" + csvYr + "_" + csvMth
-#                 todays_date = str(datetime.now())
-#                 file_url = 'http://www.nelincs.gov.uk' + url.strip()
-#                 validFilename = validateFilename(filename)
-#                 validURL, validFiletype = validateURL(file_url)
-#                 if not validFilename:
-#                     print filename, "*Error: Invalid filename*"
-#                     print file_url
-#                     errors += 1
-#                     continue
-#                 if not validURL:
-#                     print filename, "*Error: Invalid URL*"
-#                     print file_url
-#                     errors += 1
-#                     continue
-#                 if not validFiletype:
-#                     print filename, "*Error: Invalid filetype*"
-#                     print file_url
-#                     errors += 1
-#                     continue
-#                 scraperwiki.sqlite.save(unique_keys=['l'], data={"l": file_url, "f": filename, "d": todays_date })
-#                 print filename
-# if errors > 0:
-#    raise Exception("%d errors occurred during scrape." % errors)
+                url = 'http://www.nelincs.gov.uk' + link['href']
+                csvfile = csvlink.split('Local Spending Data')[-1].strip().replace('-', '').strip()
+                csvYr = csvfile.split(' ')[1]
+                csvMth = csvfile.split(' ')[0].strip()[:3]
+                if '(CSV)' in csvYr:
+                    csvYr = '2011'
+                if 'Local_Spending_Data_' in csvfile:
+                    csvYr = '2015'
+                    csvMth = 'Apr'
+                csvMth = convert_mth_strings(csvMth.upper())
+                filename = entity_id + "_" + csvYr + "_" + csvMth
+                todays_date = str(datetime.now())
+                file_url = url.strip()
+                validFilename = validateFilename(filename)
+                validURL, validFiletype = validateURL(file_url)
+                if not validFilename:
+                    print filename, "*Error: Invalid filename*"
+                    print file_url
+                    errors += 1
+                    continue
+                if not validURL:
+                    print filename, "*Error: Invalid URL*"
+                    print file_url
+                    errors += 1
+                    continue
+                if not validFiletype:
+                    print filename, "*Error: Invalid filetype*"
+                    print file_url
+                    errors += 1
+                    continue
+                scraperwiki.sqlite.save(unique_keys=['l'], data={"l": file_url, "f": filename, "d": todays_date })
+                print filename
+if errors > 0:
+    raise Exception("%d errors occurred during scrape." % errors)
