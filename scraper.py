@@ -58,7 +58,7 @@ def convert_mth_strings ( mth_string ):
     return mth_string
 # pull down the content from the webpage
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, 'lxml')
 # find all entries with the required class
 blocks = soup.find('div', 'module introPromos twoPerRow thumbTitleOnly')
 links_block = blocks.find_all('a', href = True)
@@ -67,7 +67,7 @@ for link_block in links_block:
     if '20' in link_block['href']:
        main_links = 'http://www.nelincs.gov.uk' + link_block['href']
        html_links = urllib2.urlopen(main_links)
-       sp = BeautifulSoup(html_links)
+       sp = BeautifulSoup(html_links, 'lxml')
        # print link_block.text, main_links
        block = sp.find('table', 'pageTable downloads')
        links = block.find_all('a', href = True)
