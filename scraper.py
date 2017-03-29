@@ -85,7 +85,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E2003_NELC_gov"
-url = 'http://www.nelincs.gov.uk/council/council-finances-and-spending/council-spending/'
+url = 'https://www.nelincs.gov.uk/council-information-partnerships/finances-and-spending/council-spending/published-spending-data/'
 errors = 0
 data = []
 
@@ -98,30 +98,23 @@ soup = BeautifulSoup(html, 'lxml')
 
 #### SCRAPE DATA
 
-blocks = soup.find('div', 'module introPromos twoPerRow thumbTitleOnly')
-links_block = blocks.find_all('a', href = True)
+blocks = soup.find('div', 'vc_tta-container')
+links_block = blocks.find_all('p')
 for link_block in links_block:
-    csvmth = link_block['title']
-    if '20' in link_block['href']:
-       main_links = 'http://www.nelincs.gov.uk' + link_block['href']
-       html_links = urllib2.urlopen(main_links)
-       sp = BeautifulSoup(html_links, 'lxml')
-       block = sp.find('table', 'pageTable downloads')
-       links = block.find_all('a', href = True)
-       for link in links:
-            csvlink = link.text
-            if 'Spending' and 'Data'and '(CSV)' in csvlink:
-                url = 'http://www.nelincs.gov.uk' + link['href']
-                csvfile = csvlink.split('Local Spending Data')[-1].strip().replace('-', '').strip()
-                csvYr = csvfile.split(' ')[1]
-                csvMth = csvfile.split(' ')[0].strip()[:3]
-                if '(CSV)' in csvYr:
-                    csvYr = '2011'
-                if 'Local_Spending_Data_' in csvfile:
-                    csvYr = '2015'
-                    csvMth = 'Apr'
-                csvMth = convert_mth_strings(csvMth.upper())
-                data.append([csvYr, csvMth, url])
+    if link_block.select_one('a'):
+        csvtext = link_block.find('a').text
+        if '.csv' in link_block.find('a')['href']:
+            url = link_block.find('a')['href']
+            csvfile = csvtext.split('Local Spending Data')[-1].strip().replace('-', '').strip()
+            csvYr = csvfile.split(' ')[1]
+            csvMth = csvfile.split(' ')[0].strip()[:3]
+            if '(CSV)' in csvYr:
+                csvYr = '2011'
+            if 'Local_Spending_Data_' in csvfile:
+                csvYr = '2015'
+                csvMth = 'Apr'
+            csvMth = convert_mth_strings(csvMth.upper())
+            data.append([csvYr, csvMth, url])
 
 
 #### STORE DATA 1.0
@@ -145,4 +138,3 @@ if errors > 0:
 
 
 #### EOF
-
